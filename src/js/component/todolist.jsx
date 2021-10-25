@@ -5,6 +5,8 @@ import Task from "./task.jsx";
 let isReadyForPUT = false; // with this variable we prevent the first GET from causing a PUT
 
 const TodoList = () => {
+	const myaddress =
+		"https://assets.breatheco.de/apis/fake/todos/user/jaimecr24";
 	const initialValue = [{ label: "initial task", done: false }];
 	// we define list as a list of tasks. The 'inital task' is invisible.
 	const [list, setList] = useState(initialValue);
@@ -12,7 +14,7 @@ const TodoList = () => {
 	const [inputValue, setInputValue] = useState("");
 
 	const fetchPOST = () => {
-		fetch("https://assets.breatheco.de/apis/fake/todos/user/jaimecr24", {
+		fetch(myaddress, {
 			method: "POST",
 			body: JSON.stringify([]),
 			headers: {
@@ -22,7 +24,7 @@ const TodoList = () => {
 	};
 
 	const fetchGET = () => {
-		fetch("https://assets.breatheco.de/apis/fake/todos/user/jaimecr24", {
+		fetch(myaddress, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json"
@@ -42,7 +44,7 @@ const TodoList = () => {
 	};
 
 	const fetchDEL = () => {
-		fetch("https://assets.breatheco.de/apis/fake/todos/user/jaimecr24", {
+		fetch(myaddress, {
 			method: "DELETE",
 			headers: {
 				"Content-Type": "application/json"
@@ -56,44 +58,34 @@ const TodoList = () => {
 	// Each time list changes we do a PUT
 	useEffect(() => {
 		if (isReadyForPUT) {
-			// We prevent the fetch from executing when GET modifies the list
-			fetch(
-				"https://assets.breatheco.de/apis/fake/todos/user/jaimecr24",
-				{
-					method: "PUT",
-					body: JSON.stringify(list),
-					headers: {
-						"Content-Type": "application/json"
-					}
+			// In some cases we prevent the fetch from executing
+			fetch(myaddress, {
+				method: "PUT",
+				body: JSON.stringify(list),
+				headers: {
+					"Content-Type": "application/json"
 				}
-			)
+			})
 				.then(resp => {
 					if (resp.status === 404) {
 						// user doesn't exists, then we send a POST
-						fetch(
-							"https://assets.breatheco.de/apis/fake/todos/user/jaimecr24",
-							{
-								method: "POST",
-								body: JSON.stringify([]),
-								headers: {
-									"Content-Type": "application/json"
-								}
+						fetch(myaddress, {
+							method: "POST",
+							body: JSON.stringify([]),
+							headers: {
+								"Content-Type": "application/json"
 							}
-						)
+						})
 							.then(resp => {
 								if (resp.ok) {
 									// if POST is ok, we send another time the PUT
-									fetch(
-										"https://assets.breatheco.de/apis/fake/todos/user/jaimecr24",
-										{
-											method: "PUT",
-											body: JSON.stringify(list),
-											headers: {
-												"Content-Type":
-													"application/json"
-											}
+									fetch(myaddress, {
+										method: "PUT",
+										body: JSON.stringify(list),
+										headers: {
+											"Content-Type": "application/json"
 										}
-									).catch(error => alert(error)); // if error in PUT
+									}).catch(error => alert(error)); // if error in PUT
 								}
 							})
 							.catch(error => alert(error)); // if error in POST
@@ -151,8 +143,8 @@ const TodoList = () => {
 			<button
 				onClick={() => {
 					isReadyForPUT = false; // The next call to setList musn't cause a PUT
-					setList(initialValue);
-					fetchDEL(); // Deletes user and all his list.
+					setList(initialValue); // Deletes list
+					fetchDEL(); // Deletes user and all his list in server
 				}}>
 				Delete All
 			</button>
